@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+.eggs/
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Distribution / packaging
+build/
+dist/
+*.wheel
+*.tar.gz
+
+# --- IDEs & Editors ---
+.idea/
+.vscode/
+
+# --- OS-specific ---
+.DS_Store
+Thumbs.db
+
+# --- Sphinx Documentation ---
+docs/build/

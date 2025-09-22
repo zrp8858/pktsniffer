@@ -1,0 +1,7 @@
+# Documentation
+sphinx
+sphinx-rtd-theme
+
+# Code quality
+black              # code formatter
+flake8             # linter
