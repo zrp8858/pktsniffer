@@ -27,3 +27,6 @@ Thumbs.db
 
 # --- Sphinx Documentation ---
 docs/build/
+
+# --- Additional ---
+captures/
