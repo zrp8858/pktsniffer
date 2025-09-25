@@ -1,7 +1,8 @@
 import argparse
+from unittest import case
 
 from scapy.data import IP_PROTOS
-from scapy.layers.inet import IP
+from scapy.layers.inet import IP, TCP, UDP, ICMP
 from scapy.layers.l2 import Ether, ETHER_TYPES
 from scapy.packet import Packet
 from scapy.utils import rdpcap
@@ -64,11 +65,70 @@ def parse_ip_header(packet: Packet) -> str:
 
     return protocol
 
+def parse_encapsulated_header(packet: Packet, protocol: str) -> bool:
+    """
+    Parses the encapsulated header of a given packet.
+    Only parses TCP, UDP, and ICMP headers.
+    Prints the information to the console.
+    :param packet: the targeted packet.
+    :param protocol: The protocol associated with the packet.
+    :return: True if packet was parsed, False otherwise.
+    """
+    match protocol:
+        case 'tcp':
+            tcp_header = packet.getlayer(TCP)
+            print('TCP Header:'
+                  f'\n\tSPort: {tcp_header.sport}'
+                  f'\n\tDPort: {tcp_header.dport}'
+                  f'\n\tSEQ: {tcp_header.seq}'
+                  f'\n\tACK: {tcp_header.ack}'
+                  f'\n\tDataofs: {tcp_header.dataofs}'
+                  f'\n\tReserved: {tcp_header.reserved}'
+                  f'\n\tFlags: {tcp_header.flags}'
+                  f'\n\tWindow: {tcp_header.window}'
+                  f'\n\tChecksum: {tcp_header.chksum}'
+                  f'\n\tUrgptr: {tcp_header.urgptr}'
+                  f'\n\tOptions: {tcp_header.options}')
+            return True
+        case 'udp':
+            udp_header = packet.getlayer(UDP)
+            print('UDP Header:'
+                  f'\n\tSPort: {udp_header.sport}'
+                  f'\n\tDPort: {udp_header.dport}'
+                  f'\n\tLength: {udp_header.len}'
+                  f'\n\tChecksum: {udp_header.chksum}')
+            return True
+        case 'icmp':
+            icmp_header = packet.getlayer(ICMP)
+            print('ICMP Header:'
+                  f'\n\tType: {icmp_header.type}'
+                  f'\n\tCode: {icmp_header.code}'
+                  f'\n\tChecksum: {icmp_header.chksum}'
+                  f'\n\tID: {icmp_header.id}'
+                  f'\n\tSeq: {icmp_header.seq}'
+                  f'\n\tTS Ori: {icmp_header.ts_ori}'
+                  f'\n\tTS Rx: {icmp_header.ts_rx}'
+                  f'\n\tTS Tx: {icmp_header.ts_tx}'
+                  f'\n\tGW: {icmp_header.gw}'
+                  f'\n\tPtr: {icmp_header.ptr}'
+                  f'\n\tReserved: {icmp_header.reserved}'
+                  f'\n\tLength: {icmp_header.length}'
+                  f'\n\tAddress Mask: {icmp_header.addr_mask}'
+                  f'\n\tNext Hop MTU: {icmp_header.nexthopmtu}'
+                  f'\n\tUnused: {icmp_header.unused}'
+                  f'\n\tExtpad: {icmp_header.extpad}'
+                  f'\n\tExt: {icmp_header.ext}')
+            return True
+        case _:
+            return False
+
 def read_pcap_file(filepath: str):
     try:
-        contents = rdpcap(filepath)
-        if parse_ethernet_header(contents[0]):
-            parse_ip_header(contents[0])
+        for i in range(77,80):
+            contents = rdpcap(filepath)
+            if parse_ethernet_header(contents[i]):
+                protocol = parse_ip_header(contents[i])
+                parse_encapsulated_header(contents[i], protocol)
     except FileNotFoundError:
         print(f'File {filepath} not found.')
     except PermissionError:
