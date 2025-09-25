@@ -1,5 +1,6 @@
 import argparse
 
+from scapy.layers.inet import IP
 from scapy.layers.l2 import Ether, ETHER_TYPES
 from scapy.packet import Packet
 from scapy.utils import rdpcap
@@ -16,28 +17,48 @@ def generate_argument_parser() -> argparse.ArgumentParser:
 
     return parser
 
-def parse_ethernet_header(packet: Packet) -> str:
+def parse_ethernet_header(packet: Packet) -> bool:
     """
-    Parses the ethernet header of a given packet.
+    Parses the ethernet header of a given IPv4 packet.
     Prints the information to the console.
     :param packet: The target packet.
-    :return: The ethertype of the packet as a string.
+    :return: True if the packet was parsed, False otherwise.
     """
     ethernet_header = packet.getlayer(Ether)
     ethertype = ETHER_TYPES[ethernet_header.type]
 
-    print('Ethernet header:')
+    if ethertype != 'IPv4': return False
+
+    print('Ethernet Header:')
     print(f'\tPacket Size: {len(packet)} bytes')
     print(f'\tDestination MAC: {ethernet_header.dst}')
     print(f'\tSource MAC: {ethernet_header.src}')
     print(f'\tEthertype: {ethertype}')
 
-    return ethertype
+    return True
+
+def parse_ip_header(packet: Packet):
+    ip_header = packet.getlayer(IP)
+
+    print('IP Header:'
+          f'\n\tVersion: {ip_header.version}'
+          f'\n\tHeader Length: {ip_header.ihl * 4} bytes'
+          f'\n\tType of Service: {ip_header.tos}'
+          f'\n\tTotal Length: {ip_header.len} bytes'
+          f'\n\tIdentification: {ip_header.id}'
+          f'\n\tFlags: {ip_header.flags}'
+          f'\n\tFragment Offset: {ip_header.frag}'
+          f'\n\tTime to Live: {ip_header.ttl}'
+          f'\n\tProtocol: {ip_header.proto}'
+          f'\n\tHeader Checksum: {ip_header.chksum}'
+          f'\n\tSource IP: {ip_header.src}'
+          f'\n\tDestination IP: {ip_header.dst}')
 
 def read_pcap_file(filepath: str):
     try:
         contents = rdpcap(filepath)
-        ethertype = parse_ethernet_header(contents[0])
+        if parse_ethernet_header(contents[9]):
+            parse_ip_header(contents[9])
     except FileNotFoundError:
         print(f'File {filepath} not found.')
     except PermissionError:
