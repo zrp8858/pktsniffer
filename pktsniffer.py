@@ -29,15 +29,21 @@ def parse_ethernet_header(packet: Packet) -> bool:
 
     if ethertype != 'IPv4': return False
 
-    print('Ethernet Header:')
-    print(f'\tPacket Size: {len(packet)} bytes')
-    print(f'\tDestination MAC: {ethernet_header.dst}')
-    print(f'\tSource MAC: {ethernet_header.src}')
-    print(f'\tEthertype: {ethertype}')
+    print('Ethernet Header:'
+          f'\n\tPacket Size: {len(packet)} bytes'
+          f'\n\tDestination MAC: {ethernet_header.dst}'
+          f'\n\tSource MAC: {ethernet_header.src}'
+          f'\n\tEthertype: {ethertype}')
 
     return True
 
-def parse_ip_header(packet: Packet):
+def parse_ip_header(packet: Packet) -> None:
+    """
+    Parses the IP header of a given IPv4 packet.
+    Prints the information to the console.
+    :param packet: The target IPv4 packet.
+    :return: None
+    """
     ip_header = packet.getlayer(IP)
 
     print('IP Header:'
