@@ -1,5 +1,6 @@
 import argparse
 
+from scapy.data import IP_PROTOS
 from scapy.layers.inet import IP
 from scapy.layers.l2 import Ether, ETHER_TYPES
 from scapy.packet import Packet
@@ -37,14 +38,15 @@ def parse_ethernet_header(packet: Packet) -> bool:
 
     return True
 
-def parse_ip_header(packet: Packet) -> None:
+def parse_ip_header(packet: Packet) -> str:
     """
     Parses the IP header of a given IPv4 packet.
     Prints the information to the console.
     :param packet: The target IPv4 packet.
-    :return: None
+    :return: The protocol associated with the packet.
     """
     ip_header = packet.getlayer(IP)
+    protocol = IP_PROTOS[ip_header.proto]
 
     print('IP Header:'
           f'\n\tVersion: {ip_header.version}'
@@ -55,16 +57,18 @@ def parse_ip_header(packet: Packet) -> None:
           f'\n\tFlags: {ip_header.flags}'
           f'\n\tFragment Offset: {ip_header.frag}'
           f'\n\tTime to Live: {ip_header.ttl}'
-          f'\n\tProtocol: {ip_header.proto}'
+          f'\n\tProtocol: {protocol}'
           f'\n\tHeader Checksum: {ip_header.chksum}'
           f'\n\tSource IP: {ip_header.src}'
           f'\n\tDestination IP: {ip_header.dst}')
 
+    return protocol
+
 def read_pcap_file(filepath: str):
     try:
         contents = rdpcap(filepath)
-        if parse_ethernet_header(contents[9]):
-            parse_ip_header(contents[9])
+        if parse_ethernet_header(contents[0]):
+            parse_ip_header(contents[0])
     except FileNotFoundError:
         print(f'File {filepath} not found.')
     except PermissionError:
